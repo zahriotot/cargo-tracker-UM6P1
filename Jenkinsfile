@@ -9,41 +9,24 @@ pipeline {
 
         stage('Clone') {
             steps {
-                git branch: 'develop', url: 'https://github.com/akito-sama/cargo-tracker.git'
+                git branch: 'develop', url: 'https://github.com/karima889/cargo-tracker-UM6P1'
             }
         }
 
-        stage('Build & Test with Coverage') {
+        stage('Build & Test') {
             steps {
-                bat 'mvn clean verify'
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            environment {
-                SONAR_TOKEN = credentials('sonar-token-id')
-            }
-            steps {
-                withSonarQubeEnv('SonarQube Local') {
-                    bat """
-                        mvn sonar:sonar ^
-                        -Dsonar.projectKey=cargo-tracker ^
-                        -Dsonar.projectName="Cargo Tracker" ^
-                        -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml ^
-                        -Dsonar.host.url=http://localhost:9000 ^
-                        -Dsonar.token=%SONAR_TOKEN%
-                    """
-                }
+                bat 'mvnw.cmd clean package'
             }
         }
     }
-//
+
     post {
         success {
-            echo 'Build et analyse terminés avec succès !'
+            echo 'Build réussi !'
+            archiveArtifacts artifacts: 'target/*.war', fingerprint: true
         }
         failure {
-            echo 'Échec du build ou des tests.'
+            echo 'Build échoué'
         }
     }
 }
